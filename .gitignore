@@ -53,4 +53,5 @@ logs/
 diagrams/*.build.d2
 mydocs/*.build.d2
 
-mydata/
+mydocs/*
+/mydocs
