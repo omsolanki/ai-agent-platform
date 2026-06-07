@@ -1,0 +1,16 @@
+# Cost governance — model fallback chain
+
+direction: down
+
+title: "Model Fallback Chain" {class: title}
+
+main: {
+  direction: down
+
+  primary: "Primary\ngpt-4o-mini" {class: icon-external; icon: ./icons/openai.svg}
+  fallback: "Fallback\ngpt-3.5-turbo" {class: icon-external; icon: ./icons/openai.svg}
+  degraded: "Degraded\nMock / Cached" {class: icon-memory; icon: ./icons/redis.svg}
+}
+
+main.primary -> main.fallback: "rate limited / unavailable" {class: edge-metrics}
+main.fallback -> main.degraded: "rate limited / unavailable" {class: edge-metrics}

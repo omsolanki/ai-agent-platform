@@ -1,0 +1,19 @@
+# Evaluation — continuous improvement loop
+
+direction: down
+
+title: "Continuous Improvement Loop" {class: title}
+
+main: {
+  direction: right
+
+  deploy: "Deploy\nNew versions" {class: icon-platform; icon: ./icons/container.svg}
+  evaluate: "Evaluate\nScorecards" {class: icon-observability; icon: ./icons/evaluate.svg}
+  analyze: "Analyze\nFailure patterns" {class: icon-agent; icon: ./icons/search.svg}
+  improve: "Improve\nPrompts & retrieval" {class: icon-governance; icon: ./icons/shield.svg}
+}
+
+main.deploy -> main.evaluate: {class: edge-data}
+main.evaluate -> main.analyze: {class: edge-data}
+main.analyze -> main.improve: {class: edge-data}
+main.improve -> main.deploy: "Feedback loop" {class: edge-metrics}

@@ -1,0 +1,154 @@
+# Shared diagram theme — icon nodes + text tier labels (no empty group boxes)
+# Render: ./render.sh
+
+vars: {
+  d2-config: {
+    sketch: false
+    theme-id: 0
+    pad: 60
+  }
+}
+
+classes: {
+  title: {
+    shape: text
+    style.font-size: 22
+    style.bold: true
+    style.fill: "#1A237E"
+  }
+
+  tier-label: {
+    shape: text
+    style.font-size: 12
+    style.bold: true
+    style.fill: "#546E7A"
+  }
+
+  icon-base: {
+    shape: image
+    width: 64
+    height: 64
+    label.near: outside-bottom-center
+    style.font-size: 13
+  }
+
+  icon-sm: {
+    shape: image
+    width: 40
+    height: 40
+    label.near: outside-bottom-center
+    style.font-size: 11
+  }
+
+  icon-client: {
+    shape: image
+    width: 64
+    height: 64
+    label.near: outside-bottom-center
+    style.font-size: 13
+    style.fill: "#1565C0"
+  }
+
+  icon-agent: {
+    shape: image
+    width: 64
+    height: 64
+    label.near: outside-bottom-center
+    style.font-size: 13
+    style.fill: "#2E7D32"
+  }
+
+  icon-platform: {
+    shape: image
+    width: 64
+    height: 64
+    label.near: outside-bottom-center
+    style.font-size: 13
+    style.fill: "#6A1B9A"
+  }
+
+  icon-memory: {
+    shape: image
+    width: 64
+    height: 64
+    label.near: outside-bottom-center
+    style.font-size: 13
+    style.fill: "#E65100"
+  }
+
+  icon-observability: {
+    shape: image
+    width: 64
+    height: 64
+    label.near: outside-bottom-center
+    style.font-size: 13
+    style.fill: "#00838F"
+  }
+
+  icon-external: {
+    shape: image
+    width: 64
+    height: 64
+    label.near: outside-bottom-center
+    style.font-size: 13
+    style.fill: "#455A64"
+  }
+
+  icon-governance: {
+    shape: image
+    width: 64
+    height: 64
+    label.near: outside-bottom-center
+    style.font-size: 13
+    style.fill: "#C2185B"
+  }
+
+  icon-database: {
+    shape: image
+    width: 64
+    height: 64
+    label.near: outside-bottom-center
+    style.font-size: 13
+    style.fill: "#3949AB"
+  }
+
+  legend-icon: {
+    shape: image
+    width: 24
+    height: 24
+    label.near: outside-right-center
+    style.font-size: 10
+  }
+
+  legend-text: {
+    shape: text
+    style.font-size: 10
+    style.fill: "#546E7A"
+  }
+
+  box: {
+    style.fill: "#FFFFFF"
+    style.stroke: "#CFD8DC"
+    style.stroke-width: 1
+    style.border-radius: 6
+    style.font-size: 11
+  }
+
+  edge-data: {
+    style.stroke: "#37474F"
+    style.stroke-width: 2
+    style.font-size: 10
+  }
+
+  edge-metrics: {
+    style.stroke: "#78909C"
+    style.stroke-width: 2
+    style.stroke-dash: 5
+    style.font-size: 10
+  }
+
+  edge-invisible: {
+    style.opacity: 0
+    style.stroke-width: 0
+  }
+}

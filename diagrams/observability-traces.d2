@@ -1,0 +1,38 @@
+# Observability — trace span hierarchy
+
+direction: down
+
+title: "Trace Span Hierarchy" {class: title}
+
+main: {
+  direction: down
+
+  root: "workflow.execute\n(root span)" {class: icon-observability; icon: ./icons/opentelemetry.svg}
+
+  research: {
+    direction: right
+    r_agent: "agent.research_agent.execute" {class: icon-agent; icon: ./icons/search.svg}
+    r_llm: "llm.chat_completion" {class: icon-external; icon: ./icons/openai.svg}
+  }
+
+  knowledge: {
+    direction: right
+    k_agent: "agent.knowledge_agent.execute" {class: icon-agent; icon: ./icons/brain.svg}
+    k_vec: "memory.vector_search" {class: icon-database; icon: ./icons/qdrant.svg}
+    k_llm: "llm.chat_completion" {class: icon-external; icon: ./icons/openai.svg}
+  }
+
+  summary: {
+    direction: right
+    s_agent: "agent.summarization_agent.execute" {class: icon-agent; icon: ./icons/document.svg}
+    s_llm: "llm.chat_completion" {class: icon-external; icon: ./icons/openai.svg}
+  }
+}
+
+main.root -> main.research.r_agent: {class: edge-metrics}
+main.research.r_agent -> main.research.r_llm: {class: edge-metrics}
+main.root -> main.knowledge.k_agent: {class: edge-metrics}
+main.knowledge.k_agent -> main.knowledge.k_vec: {class: edge-data}
+main.knowledge.k_agent -> main.knowledge.k_llm: {class: edge-metrics}
+main.root -> main.summary.s_agent: {class: edge-metrics}
+main.summary.s_agent -> main.summary.s_llm: {class: edge-metrics}

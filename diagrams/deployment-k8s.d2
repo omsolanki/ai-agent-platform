@@ -1,0 +1,66 @@
+# Kubernetes / EKS Deployment
+
+direction: down
+
+title: "Deployment: Kubernetes / EKS" {class: title}
+
+main: {
+  direction: down
+
+  ingress_lbl: "Ingress (NGINX + TLS)" {class: tier-label}
+  ingress: {
+    direction: right
+    users: "Users" {class: icon-client; icon: ./icons/users.svg}
+    nginx: "NGINX Ingress" {class: icon-platform; icon: ./icons/nginx.svg}
+  }
+
+  app_lbl: "Application Namespace" {class: tier-label}
+  app: {
+    direction: right
+    api: "API Deployment\n3–20 replicas (HPA)" {class: icon-agent; icon: ./icons/fastapi.svg}
+    eso: "External Secrets\nOperator" {class: icon-governance; icon: ./icons/secrets.svg}
+  }
+
+  data_lbl: "Data Namespace" {class: tier-label}
+  data: {
+    direction: right
+    postgres: "PostgreSQL\nStatefulSet" {class: icon-database; icon: ./icons/postgresql.svg}
+    qdrant: "Qdrant\nStatefulSet" {class: icon-database; icon: ./icons/qdrant.svg}
+    redis: "Redis Cache" {class: icon-database; icon: ./icons/redis.svg}
+  }
+
+  obs_lbl: "Observability Namespace" {class: tier-label}
+  obs: {
+    direction: right
+    otel: "OTel Collector" {class: icon-observability; icon: ./icons/opentelemetry.svg}
+    prometheus: "Prometheus" {class: icon-observability; icon: ./icons/prometheus.svg}
+    grafana: "Grafana" {class: icon-observability; icon: ./icons/grafana.svg}
+    jaeger: "Jaeger\n(optional)" {class: icon-observability; icon: ./icons/jaeger.svg}
+  }
+
+  ext_lbl: "External" {class: tier-label}
+  ext: {
+    direction: right
+    openai: "OpenAI API" {class: icon-external; icon: ./icons/openai.svg}
+    k8s: "Kubernetes (EKS)" {class: icon-platform; icon: ./icons/kubernetes.svg}
+  }
+}
+
+main.ingress_lbl -> main.ingress.users: {class: edge-invisible}
+main.app_lbl -> main.app.api: {class: edge-invisible}
+main.data_lbl -> main.data.postgres: {class: edge-invisible}
+main.obs_lbl -> main.obs.otel: {class: edge-invisible}
+main.ext_lbl -> main.ext.openai: {class: edge-invisible}
+
+main.ingress.users -> main.ingress.nginx: "HTTPS" {class: edge-data}
+main.ingress.nginx -> main.app.api: "Route traffic" {class: edge-data}
+main.app.api -> main.data.postgres: "ClusterIP" {class: edge-data}
+main.app.api -> main.data.qdrant: "ClusterIP" {class: edge-data}
+main.app.api -> main.data.redis: "ClusterIP" {class: edge-data}
+main.app.api -> main.obs.otel: "Traces" {class: edge-metrics}
+main.app.eso -> main.app.api: "Inject secrets" {class: edge-metrics}
+main.obs.otel -> main.obs.prometheus: "Metrics" {class: edge-metrics}
+main.obs.prometheus -> main.obs.grafana: "Dashboards" {class: edge-data}
+main.obs.otel -> main.obs.jaeger: "Spans" {class: edge-metrics}
+main.app.api -> main.ext.openai: "LLM API" {class: edge-data}
+main.ext.k8s -> main.app.api: "Orchestrates" {class: edge-metrics}

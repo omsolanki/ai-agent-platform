@@ -1,0 +1,43 @@
+# Workflow Sequence — Request Lifecycle
+
+direction: down
+
+title: "Workflow Sequence" {class: title}
+
+main: {
+  direction: down
+
+  flow_lbl: "Request Lifecycle" {class: tier-label}
+  flow: {
+    direction: right
+    client: "Client" {class: icon-client; icon: ./icons/user.svg}
+    api: "FastAPI\nAPI Gateway" {class: icon-client; icon: ./icons/fastapi.svg}
+    guard: "Governance\nGuard" {class: icon-governance; icon: ./icons/shield.svg}
+    router: "Agent\nRouter" {class: icon-platform; icon: ./icons/route.svg}
+    research: "Research\nAgent" {class: icon-agent; icon: ./icons/search.svg}
+    knowledge: "Knowledge\nAgent" {class: icon-agent; icon: ./icons/brain.svg}
+    summary: "Summarization\nAgent" {class: icon-agent; icon: ./icons/document.svg}
+    eval: "Evaluation\nService" {class: icon-observability; icon: ./icons/evaluate.svg}
+  }
+
+  memory_lbl: "Memory Service" {class: tier-label}
+  memory: "Memory\nService" {class: icon-memory; icon: ./icons/memory.svg}
+}
+
+main.flow_lbl -> main.flow.client: {class: edge-invisible}
+main.memory_lbl -> main.memory: {class: edge-invisible}
+
+main.flow.client -> main.flow.api: "POST /workflow/execute" {class: edge-data}
+main.flow.api -> main.flow.guard: "Validate" {class: edge-data}
+main.flow.guard -> main.flow.router: "Route" {class: edge-data}
+main.flow.router -> main.flow.research: "Execute" {class: edge-data}
+main.flow.research -> main.flow.knowledge: "Findings" {class: edge-data}
+main.flow.knowledge -> main.flow.summary: "Grounded response" {class: edge-data}
+main.flow.summary -> main.flow.eval: "Evaluate" {class: edge-data}
+main.flow.eval -> main.flow.api: "Scorecard" {class: edge-data}
+main.flow.api -> main.flow.client: "Final response" {class: edge-data}
+
+main.flow.research -> main.memory: "Log execution" {class: edge-metrics}
+main.flow.knowledge -> main.memory: "Vector search" {class: edge-data}
+main.memory -> main.flow.knowledge: "Chunks" {class: edge-data}
+main.flow.api -> main.memory: "Persist workflow" {class: edge-metrics}

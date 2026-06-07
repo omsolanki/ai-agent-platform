@@ -1,0 +1,34 @@
+# BaseAgent — inheritance and capabilities
+
+direction: down
+
+title: "BaseAgent Architecture" {class: title}
+
+main: {
+  direction: down
+
+  caps_lbl: "Shared capabilities (BaseAgent)" {class: tier-label}
+  caps: {
+    direction: right
+    tracing: "Tracing\n(OTel)" {class: box}
+    metrics: "Metrics\n(Prometheus)" {class: box}
+    llm: "LLM\nClient" {class: box}
+    cost: "Cost\nTracking" {class: box}
+    errors: "Error\nHandling" {class: box}
+  }
+
+  agents_lbl: "Specialized agents" {class: tier-label}
+  agents: {
+    direction: right
+    research: "ResearchAgent" {class: icon-agent; icon: ./icons/search.svg}
+    knowledge: "KnowledgeAgent" {class: icon-agent; icon: ./icons/brain.svg}
+    summarization: "SummarizationAgent" {class: icon-agent; icon: ./icons/document.svg}
+  }
+
+  entry: "execute(context)" {class: tier-label}
+}
+
+main.caps_lbl -> main.caps.tracing: {class: edge-invisible}
+main.agents_lbl -> main.agents.research: {class: edge-invisible}
+main.entry -> main.caps.tracing: {class: edge-invisible}
+main.caps -> main.agents.research: "inherits" {class: edge-data}

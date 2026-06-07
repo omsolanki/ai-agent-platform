@@ -1,0 +1,30 @@
+# Cost governance — model selection
+
+direction: down
+
+title: "Model Selection by Complexity" {class: title}
+
+main: {
+  direction: down
+
+  assess: "Query Complexity\nAssessment" {class: icon-platform; icon: ./icons/route.svg}
+
+  simple: "Simple\n(factual)" {class: box}
+  moderate: "Moderate\n(analysis)" {class: box}
+  complex: "Complex\n(multi-step)" {class: box}
+  critical: "Critical\n(compliance)" {class: box}
+
+  mini1: "gpt-4o-mini" {class: icon-external; icon: ./icons/openai.svg}
+  mini2: "gpt-4o-mini" {class: icon-external; icon: ./icons/openai.svg}
+  gpt4: "gpt-4o" {class: icon-external; icon: ./icons/openai.svg}
+  human: "gpt-4o +\nHuman Review" {class: icon-governance; icon: ./icons/shield.svg}
+}
+
+main.assess -> main.simple: {class: edge-data}
+main.assess -> main.moderate: {class: edge-data}
+main.assess -> main.complex: {class: edge-data}
+main.assess -> main.critical: {class: edge-metrics}
+main.simple -> main.mini1: {class: edge-data}
+main.moderate -> main.mini2: {class: edge-data}
+main.complex -> main.gpt4: {class: edge-data}
+main.critical -> main.human: {class: edge-data}

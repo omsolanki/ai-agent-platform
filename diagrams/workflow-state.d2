@@ -1,0 +1,22 @@
+# Workflow state machine
+
+direction: down
+
+title: "Workflow State Machine" {class: title}
+
+main: {
+  direction: right
+
+  pending: "PENDING" {class: box}
+  running: "RUNNING" {class: box}
+  retrying: "RETRYING" {class: box}
+  completed: "COMPLETED" {class: box}
+  failed: "FAILED" {class: box}
+}
+
+main.pending -> main.running: "start" {class: edge-data}
+main.running -> main.completed: "all agents OK" {class: edge-data}
+main.running -> main.retrying: "transient failure" {class: edge-metrics}
+main.retrying -> main.running: "retry" {class: edge-data}
+main.running -> main.failed: "max retries / block" {class: edge-data}
+main.retrying -> main.failed: "max retries" {class: edge-data}

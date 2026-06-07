@@ -1,0 +1,67 @@
+# AWS ECS/Fargate Deployment
+
+direction: down
+
+title: "Deployment: AWS ECS / Fargate" {class: title}
+
+main: {
+  direction: down
+
+  edge_lbl: "Edge Layer (public subnet)" {class: tier-label}
+  edge: {
+    direction: right
+    users: "Users" {class: icon-client; icon: ./icons/users.svg}
+    waf: "AWS WAF" {class: icon-governance; icon: ./icons/waf.svg}
+    alb: "Application\nLoad Balancer" {class: icon-platform; icon: ./icons/loadbalancer.svg}
+  }
+
+  compute_lbl: "ECS Fargate Cluster (private subnet)" {class: tier-label}
+  compute: {
+    direction: right
+    api_1: "API Task 1" {class: icon-agent; icon: ./icons/fastapi.svg}
+    api_2: "API Task 2" {class: icon-agent; icon: ./icons/fastapi.svg}
+    api_n: "API Task N\n2–10 replicas" {class: icon-agent; icon: ./icons/fastapi.svg}
+  }
+
+  data_lbl: "Data Layer (private subnet)" {class: tier-label}
+  data: {
+    direction: right
+    rds: "RDS PostgreSQL\nMulti-AZ" {class: icon-database; icon: ./icons/rds.svg}
+    qdrant: "Qdrant\nEC2 / Cloud" {class: icon-database; icon: ./icons/qdrant.svg}
+    secrets: "Secrets Manager" {class: icon-governance; icon: ./icons/secrets.svg}
+  }
+
+  obs_lbl: "Observability" {class: tier-label}
+  obs: {
+    direction: right
+    cloudwatch: "CloudWatch\nLogs" {class: icon-observability; icon: ./icons/cloudwatch.svg}
+    amp: "Managed\nPrometheus" {class: icon-observability; icon: ./icons/prometheus.svg}
+    amg: "Managed\nGrafana" {class: icon-observability; icon: ./icons/grafana.svg}
+  }
+
+  ext_lbl: "External" {class: tier-label}
+  ext: {
+    direction: right
+    openai: "OpenAI API" {class: icon-external; icon: ./icons/openai.svg}
+    aws: "Amazon Web Services" {class: icon-platform; icon: ./icons/aws.svg}
+  }
+}
+
+main.edge_lbl -> main.edge.users: {class: edge-invisible}
+main.compute_lbl -> main.compute.api_1: {class: edge-invisible}
+main.data_lbl -> main.data.rds: {class: edge-invisible}
+main.obs_lbl -> main.obs.cloudwatch: {class: edge-invisible}
+main.ext_lbl -> main.ext.openai: {class: edge-invisible}
+
+main.edge.users -> main.edge.waf: "HTTPS" {class: edge-data}
+main.edge.waf -> main.edge.alb: "Filtered" {class: edge-data}
+main.edge.alb -> main.compute.api_1: "Route" {class: edge-data}
+main.compute.api_1 -> main.compute.api_2 -> main.compute.api_n: {class: edge-invisible}
+
+main.compute -> main.data.rds: "Private subnet" {class: edge-data}
+main.compute -> main.data.qdrant: "Private subnet" {class: edge-data}
+main.compute -> main.data.secrets: "API keys" {class: edge-data}
+main.compute -> main.obs.cloudwatch: "Traces + Logs" {class: edge-metrics}
+main.obs.cloudwatch -> main.obs.amp: "Metrics" {class: edge-metrics}
+main.obs.amp -> main.obs.amg: "Dashboards" {class: edge-data}
+main.compute -> main.ext.openai: "LLM API" {class: edge-data}

@@ -1,0 +1,60 @@
+# System Context — AI Agent Platform
+
+direction: down
+
+title: "System Context" {class: title}
+
+main: {
+  direction: down
+
+  ingress_lbl: "Client & API" {class: tier-label}
+  ingress: {
+    direction: right
+    users: "Users &\nClient Apps" {class: icon-client; icon: ./icons/users.svg}
+    api: "FastAPI\nAPI Layer" {class: icon-client; icon: ./icons/fastapi.svg}
+    governance: "Governance\nGuard" {class: icon-governance; icon: ./icons/shield.svg}
+    orchestrator: "LangGraph\nOrchestrator" {class: icon-platform; icon: ./icons/workflow.svg}
+  }
+
+  agents_lbl: "Agent Pool" {class: tier-label}
+  agents: {
+    direction: right
+    research: "Research\nAgent" {class: icon-agent; icon: ./icons/search.svg}
+    knowledge: "Knowledge\nAgent" {class: icon-agent; icon: ./icons/brain.svg}
+    summarization: "Summarization\nAgent" {class: icon-agent; icon: ./icons/document.svg}
+  }
+
+  stores_lbl: "Memory & External" {class: tier-label}
+  stores: {
+    direction: right
+    vector: "Qdrant\nVector Store" {class: icon-database; icon: ./icons/qdrant.svg}
+    metadata: "PostgreSQL\nMetadata" {class: icon-database; icon: ./icons/postgresql.svg}
+    openai: "OpenAI API\nLLM Provider" {class: icon-external; icon: ./icons/openai.svg}
+  }
+
+  obs_lbl: "Observability Stack" {class: tier-label}
+  obs: {
+    direction: right
+    otel: "OpenTelemetry\nTracing" {class: icon-observability; icon: ./icons/opentelemetry.svg}
+    prometheus: "Prometheus\nMetrics" {class: icon-observability; icon: ./icons/prometheus.svg}
+    grafana: "Grafana\nDashboards" {class: icon-observability; icon: ./icons/grafana.svg}
+  }
+}
+
+main.ingress_lbl -> main.ingress.users: {class: edge-invisible}
+main.agents_lbl -> main.agents.research: {class: edge-invisible}
+main.stores_lbl -> main.stores.vector: {class: edge-invisible}
+main.obs_lbl -> main.obs.otel: {class: edge-invisible}
+
+main.ingress.users -> main.ingress.api: "HTTP / REST" {class: edge-data}
+main.ingress.api -> main.ingress.governance: "Validate" {class: edge-data}
+main.ingress.governance -> main.ingress.orchestrator: "Route" {class: edge-data}
+main.ingress.orchestrator -> main.agents.research: "Execute" {class: edge-data}
+main.agents.research -> main.agents.knowledge: "Findings" {class: edge-data}
+main.agents.knowledge -> main.agents.summarization: "Grounded" {class: edge-data}
+main.agents.knowledge -> main.stores.vector: "Semantic Search" {class: edge-data}
+main.ingress.orchestrator -> main.stores.metadata: "Persist State" {class: edge-data}
+main.agents.summarization -> main.stores.openai: "LLM Calls" {class: edge-data}
+main.ingress.api -> main.obs.otel: "Traces + Metrics" {class: edge-metrics}
+main.obs.otel -> main.obs.prometheus: {class: edge-invisible}
+main.obs.prometheus -> main.obs.grafana: {class: edge-invisible}

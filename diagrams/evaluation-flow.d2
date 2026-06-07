@@ -1,0 +1,64 @@
+# Evaluation Flow — Quality Assessment Pipeline
+
+direction: down
+
+title: "Evaluation Framework" {class: title}
+
+main: {
+  direction: down
+
+  source_lbl: "Input" {class: tier-label}
+  source: "Workflow Response" {class: icon-client; icon: ./icons/document.svg}
+
+  auto_lbl: "Automated Evaluation — 100% of requests" {class: tier-label}
+  auto: {
+    direction: right
+    task: "Task\nCompletion" {class: icon-sm; icon: ./icons/checklist.svg}
+    grounded: "Groundedness" {class: icon-sm; icon: ./icons/database.svg}
+    accuracy: "Agent\nAccuracy" {class: icon-sm; icon: ./icons/robot.svg}
+    cost: "Cost\nEfficiency" {class: icon-sm; icon: ./icons/chart.svg}
+  }
+
+  llm_lbl: "LLM-as-Judge — 10% sampled" {class: tier-label}
+  llm: {
+    direction: right
+    quality: "Answer\nQuality" {class: icon-sm; icon: ./icons/brain.svg}
+    hallucination: "Hallucination\nDetection" {class: icon-sm; icon: ./icons/eye.svg}
+    relevance: "Relevance" {class: icon-sm; icon: ./icons/search.svg}
+  }
+
+  human_lbl: "Human Review — 1% sampled" {class: tier-label}
+  human: {
+    direction: right
+    expert: "Expert\nRating" {class: icon-sm; icon: ./icons/user.svg}
+    safety: "Safety\nCheck" {class: icon-sm; icon: ./icons/shield.svg}
+    action: "Actionability" {class: icon-sm; icon: ./icons/checklist.svg}
+  }
+
+  output_lbl: "Output" {class: tier-label}
+  output: {
+    direction: right
+    scorecard: "Evaluation\nScorecard" {class: icon-client; icon: ./icons/evaluate.svg}
+    trends: "Quality Trends\n(feedback loop)" {class: icon-observability; icon: ./icons/grafana.svg}
+  }
+}
+
+main.source_lbl -> main.source: {class: edge-invisible}
+main.auto_lbl -> main.auto.task: {class: edge-invisible}
+main.llm_lbl -> main.llm.quality: {class: edge-invisible}
+main.human_lbl -> main.human.expert: {class: edge-invisible}
+main.output_lbl -> main.output.scorecard: {class: edge-invisible}
+
+main.source -> main.auto.task: {class: edge-data}
+main.auto.task -> main.auto.grounded -> main.auto.accuracy -> main.auto.cost: {class: edge-invisible}
+main.auto.cost -> main.output.scorecard: "Immediate metrics" {class: edge-data}
+
+main.source -> main.llm.quality: {class: edge-metrics}
+main.llm.quality -> main.llm.hallucination -> main.llm.relevance: {class: edge-invisible}
+main.llm.relevance -> main.output.scorecard: "Quality scores" {class: edge-data}
+
+main.source -> main.human.expert: {class: edge-metrics}
+main.human.expert -> main.human.safety -> main.human.action: {class: edge-invisible}
+main.human.action -> main.output.scorecard: "Expert ratings" {class: edge-data}
+
+main.output.scorecard -> main.output.trends: "Aggregate trends" {class: edge-data}

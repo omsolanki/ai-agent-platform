@@ -1,0 +1,23 @@
+# Shared legend strip — concatenated at bottom of each diagram by render.sh
+
+title -> main: {class: edge-invisible}
+main -> legend: {class: edge-invisible}
+
+legend: {
+  near: bottom-center
+  direction: right
+  grid-rows: 1
+  grid-columns: 9
+
+  leg_title: "Legend:" {class: legend-text}
+  leg_api: "API" {class: legend-icon; icon: ./icons/api.svg}
+  leg_db: "DB" {class: legend-icon; icon: ./icons/database.svg}
+  leg_obs: "Obs" {class: legend-icon; icon: ./icons/opentelemetry.svg}
+  leg_ext: "External" {class: legend-icon; icon: ./icons/world.svg}
+  leg_rt: "Runtime" {class: legend-icon; icon: ./icons/container.svg}
+  leg_sep: "|" {class: legend-text}
+  leg_line_solid: "—— data/API" {class: legend-text}
+  leg_line_dash: "- - metrics" {class: legend-text}
+
+  leg_title -> leg_api -> leg_db -> leg_obs -> leg_ext -> leg_rt -> leg_sep -> leg_line_solid -> leg_line_dash: {class: edge-invisible}
+}

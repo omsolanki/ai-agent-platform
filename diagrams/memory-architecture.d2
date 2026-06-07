@@ -1,0 +1,64 @@
+# Memory Architecture — Short & Long Term Stores
+
+direction: down
+
+title: "Memory Architecture" {class: title}
+
+main: {
+  direction: down
+
+  agents_lbl: "Agent Layer" {class: tier-label}
+  agents: {
+    direction: right
+    research: "Research Agent" {class: icon-agent; icon: ./icons/search.svg}
+    knowledge: "Knowledge Agent" {class: icon-agent; icon: ./icons/brain.svg}
+    summarization: "Summarization Agent" {class: icon-agent; icon: ./icons/document.svg}
+  }
+
+  short_lbl: "Short-Term Memory (request lifetime)" {class: tier-label}
+  short: {
+    direction: right
+    workflow_state: "LangGraph\nWorkflow State" {class: icon-memory; icon: ./icons/workflow.svg}
+    conversation: "Conversation\nContext" {class: icon-memory; icon: ./icons/users.svg}
+    agent_outputs: "Agent Output\nCache" {class: icon-memory; icon: ./icons/robot.svg}
+  }
+
+  long_lbl: "Long-Term Memory (persistent)" {class: tier-label}
+  long: {
+    direction: right
+    qdrant: "Qdrant\nVector Store" {class: icon-database; icon: ./icons/qdrant.svg}
+    postgres: "PostgreSQL\nMetadata" {class: icon-database; icon: ./icons/postgresql.svg}
+    redis: "Redis Cache\n1hr TTL (Stage 2+)" {class: icon-database; icon: ./icons/redis.svg}
+  }
+
+  schema_lbl: "Stored schemas" {class: tier-label}
+  schema: {
+    direction: right
+    vector_detail: {
+      label: "Qdrant collections"
+      embeddings: "Document\nEmbeddings" {class: box}
+      semantic: "Semantic\nIndex" {class: box}
+    }
+    relational_detail: {
+      label: "PostgreSQL tables"
+      sessions: "Sessions" {class: box}
+      workflows: "Workflow\nHistory" {class: box}
+      audit: "Audit Log" {class: box}
+      executions: "Agent\nExecutions" {class: box}
+    }
+  }
+}
+
+main.agents_lbl -> main.agents.research: {class: edge-invisible}
+main.short_lbl -> main.short.workflow_state: {class: edge-invisible}
+main.long_lbl -> main.long.qdrant: {class: edge-invisible}
+main.schema_lbl -> main.schema.vector_detail: {class: edge-invisible}
+
+main.agents -> main.short.workflow_state: "Read / Write" {class: edge-data}
+main.agents -> main.short.conversation: "Session context" {class: edge-data}
+main.short.workflow_state -> main.long.postgres: "Persist on completion" {class: edge-data}
+main.agents.knowledge -> main.long.qdrant: "Semantic search" {class: edge-data}
+main.long.qdrant -> main.agents.knowledge: "Retrieved chunks" {class: edge-data}
+main.short -> main.long.redis: "Cache queries (future)" {class: edge-metrics}
+main.long.qdrant -> main.schema.vector_detail: {class: edge-invisible}
+main.long.postgres -> main.schema.relational_detail: {class: edge-invisible}

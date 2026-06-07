@@ -1,0 +1,21 @@
+# Workflow orchestration — agent routing
+
+direction: down
+
+title: "Agent Routing Strategies" {class: title}
+
+main: {
+  direction: down
+
+  router: "Agent Router" {class: icon-platform; icon: ./icons/route.svg}
+
+  full: "FULL_PIPELINE\nResearch → Knowledge → Summary" {class: icon-agent; icon: ./icons/search.svg}
+  knowledge: "KNOWLEDGE_ONLY\nKnowledge → Summary" {class: icon-agent; icon: ./icons/brain.svg}
+  research: "RESEARCH_SUMMARY\nResearch → Summary" {class: icon-agent; icon: ./icons/document.svg}
+  direct: "DIRECT_SUMMARY\nSummary only" {class: icon-agent; icon: ./icons/checklist.svg}
+}
+
+main.router -> main.full: "all enabled (default)" {class: edge-data}
+main.router -> main.knowledge: "knowledge + summary" {class: edge-data}
+main.router -> main.research: "research + summary" {class: edge-data}
+main.router -> main.direct: "summary only" {class: edge-data}

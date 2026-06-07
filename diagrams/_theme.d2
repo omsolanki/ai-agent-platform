@@ -1,0 +1,194 @@
+# Legacy theme — superseded by _theme-a4.d2 (A4 landscape, 96px icons, legend strip)
+# Render: ./render.sh  (uses _theme-a4.d2)
+
+vars: {
+  d2-config: {
+    sketch: false
+    theme-id: 0
+    pad: 140
+  }
+}
+
+classes: {
+  title: {
+    shape: text
+    style.font-size: 24
+    style.bold: true
+    style.fill: "#1A237E"
+  }
+
+  # ── Standalone icons: large image + label below (no box) ──
+  icon-base: {
+    shape: image
+    width: 80
+    height: 80
+    label.near: outside-bottom-center
+    style.font-size: 14
+  }
+
+  icon-sm: {
+    shape: image
+    width: 56
+    height: 56
+    label.near: outside-bottom-center
+    style.font-size: 12
+  }
+
+  icon-client: {
+    shape: image
+    width: 80
+    height: 80
+    label.near: outside-bottom-center
+    style.font-size: 14
+    style.fill: "#1565C0"
+  }
+
+  icon-agent: {
+    shape: image
+    width: 80
+    height: 80
+    label.near: outside-bottom-center
+    style.font-size: 14
+    style.fill: "#2E7D32"
+  }
+
+  icon-platform: {
+    shape: image
+    width: 80
+    height: 80
+    label.near: outside-bottom-center
+    style.font-size: 14
+    style.fill: "#6A1B9A"
+  }
+
+  icon-memory: {
+    shape: image
+    width: 80
+    height: 80
+    label.near: outside-bottom-center
+    style.font-size: 14
+    style.fill: "#E65100"
+  }
+
+  icon-observability: {
+    shape: image
+    width: 80
+    height: 80
+    label.near: outside-bottom-center
+    style.font-size: 14
+    style.fill: "#00838F"
+  }
+
+  icon-external: {
+    shape: image
+    width: 80
+    height: 80
+    label.near: outside-bottom-center
+    style.font-size: 14
+    style.fill: "#455A64"
+  }
+
+  icon-governance: {
+    shape: image
+    width: 80
+    height: 80
+    label.near: outside-bottom-center
+    style.font-size: 14
+    style.fill: "#C2185B"
+  }
+
+  icon-database: {
+    shape: image
+    width: 80
+    height: 80
+    label.near: outside-bottom-center
+    style.font-size: 14
+    style.fill: "#3949AB"
+  }
+
+  # ── Group containers: labeled box only (no icon) ──
+  group: {
+    label.near: outside-top-center
+    style.fill: "#FAFAFA"
+    style.stroke: "#90A4AE"
+    style.stroke-width: 2
+    style.border-radius: 12
+    style.bold: true
+    style.font-size: 15
+  }
+
+  group-platform: {
+    label.near: outside-top-center
+    style.fill: "#F3E5F5"
+    style.stroke: "#8E24AA"
+    style.stroke-width: 2
+    style.border-radius: 12
+    style.bold: true
+    style.font-size: 15
+  }
+
+  group-agent: {
+    label.near: outside-top-center
+    style.fill: "#E8F5E9"
+    style.stroke: "#43A047"
+    style.stroke-width: 2
+    style.border-radius: 12
+    style.bold: true
+    style.font-size: 15
+  }
+
+  group-memory: {
+    label.near: outside-top-center
+    style.fill: "#FFF8E1"
+    style.stroke: "#FB8C00"
+    style.stroke-width: 2
+    style.border-radius: 12
+    style.bold: true
+    style.font-size: 15
+  }
+
+  group-observability: {
+    label.near: outside-top-center
+    style.fill: "#E0F7FA"
+    style.stroke: "#00838F"
+    style.stroke-width: 2
+    style.border-radius: 12
+    style.bold: true
+    style.font-size: 15
+  }
+
+  group-external: {
+    label.near: outside-top-center
+    style.fill: "#ECEFF1"
+    style.stroke: "#607D8B"
+    style.stroke-width: 2
+    style.border-radius: 12
+    style.bold: true
+    style.font-size: 15
+  }
+
+  group-governance: {
+    label.near: outside-top-center
+    style.fill: "#FCE4EC"
+    style.stroke: "#D81B60"
+    style.stroke-width: 2
+    style.border-radius: 12
+    style.bold: true
+    style.font-size: 15
+  }
+
+  # ── Plain text boxes (no icon) ──
+  box: {
+    style.fill: "#FFFFFF"
+    style.stroke: "#CFD8DC"
+    style.stroke-width: 1
+    style.border-radius: 6
+    style.font-size: 12
+  }
+
+  edge: {
+    style.stroke: "#546E7A"
+    style.stroke-width: 2
+    style.font-size: 12
+  }
+}

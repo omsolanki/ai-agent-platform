@@ -1,0 +1,76 @@
+# Scalability evolution — Stages 1–4
+
+direction: down
+
+title: "Scalability Evolution" {class: title}
+
+main: {
+  direction: down
+
+  s1_lbl: "Stage 1 — Single Process (current)" {class: tier-label}
+  s1: {
+    direction: right
+    api: "API" {class: icon-client; icon: ./icons/fastapi.svg}
+    orch: "Orchestrator" {class: icon-platform; icon: ./icons/workflow.svg}
+    agents: "Agents" {class: icon-agent; icon: ./icons/robot.svg}
+    mem: "In-process\nMemory" {class: icon-memory; icon: ./icons/memory.svg}
+  }
+
+  s2_lbl: "Stage 2 — Distributed Agent Services" {class: tier-label}
+  s2: {
+    direction: right
+    gw: "API Gateway" {class: icon-client; icon: ./icons/api.svg}
+    queue: "Message Queue\nSQS / Kafka" {class: icon-platform; icon: ./icons/route.svg}
+    workers: "Agent Workers" {class: icon-agent; icon: ./icons/robot.svg}
+    orch2: "Orchestrator\nLangGraph" {class: icon-platform; icon: ./icons/workflow.svg}
+  }
+
+  s3_lbl: "Stage 3 — Dedicated Memory Layer" {class: tier-label}
+  s3: {
+    direction: right
+    api3: "API" {class: icon-client; icon: ./icons/fastapi.svg}
+    orch3: "Orchestrator" {class: icon-platform; icon: ./icons/workflow.svg}
+    cluster: "Agent Cluster" {class: icon-agent; icon: ./icons/robot.svg}
+    redis: "Redis Cache" {class: icon-database; icon: ./icons/redis.svg}
+    qdrant: "Qdrant" {class: icon-database; icon: ./icons/qdrant.svg}
+    pg: "PostgreSQL HA" {class: icon-database; icon: ./icons/postgresql.svg}
+  }
+
+  s4_lbl: "Stage 4 — Enterprise Multi-Agent Platform" {class: tier-label}
+  s4: {
+    direction: right
+    tenant: "Tenant Mgmt" {class: box}
+    registry: "Agent Registry" {class: box}
+    policy: "Policy Engine" {class: box}
+    cost: "Cost Mgmt" {class: box}
+    apigw: "API GW + Auth" {class: icon-client; icon: ./icons/api.svg}
+    engine: "Orchestration\nEngine" {class: icon-platform; icon: ./icons/workflow.svg}
+    market: "Agent\nMarketplace" {class: icon-agent; icon: ./icons/robot.svg}
+    shared: "Shared Memory +\nKnowledge + Obs" {class: icon-memory; icon: ./icons/memory.svg}
+  }
+
+  mig_lbl: "Migration path" {class: tier-label}
+  mig: {
+    direction: right
+    m1: "Stage 1" {class: box}
+    m2: "Stage 2\n3–6 mo" {class: box}
+    m3: "Stage 3\n6–12 mo" {class: box}
+    m4: "Stage 4\n12+ mo" {class: box}
+  }
+}
+
+main.s1_lbl -> main.s1.api: {class: edge-invisible}
+main.s2_lbl -> main.s2.gw: {class: edge-invisible}
+main.s3_lbl -> main.s3.api3: {class: edge-invisible}
+main.s4_lbl -> main.s4.tenant: {class: edge-invisible}
+main.mig_lbl -> main.mig.m1: {class: edge-invisible}
+
+main.s1.api -> main.s1.orch -> main.s1.agents -> main.s1.mem: {class: edge-invisible}
+main.s2.gw -> main.s2.queue -> main.s2.workers: {class: edge-data}
+main.s2.queue -> main.s2.orch2: {class: edge-metrics}
+main.s3.api3 -> main.s3.orch3 -> main.s3.cluster: {class: edge-data}
+main.s3.cluster -> main.s3.redis: {class: edge-data}
+main.s3.cluster -> main.s3.qdrant: {class: edge-data}
+main.s3.cluster -> main.s3.pg: {class: edge-data}
+
+main.mig.m1 -> main.mig.m2 -> main.mig.m3 -> main.mig.m4: {class: edge-data}

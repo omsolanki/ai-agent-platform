@@ -1,0 +1,43 @@
+# Local Docker Deployment
+
+direction: down
+
+title: "Deployment: Local Docker" {class: title}
+
+main: {
+  direction: down
+
+  app_lbl: "Application (Docker Host)" {class: tier-label}
+  app: {
+    direction: right
+    developer: "Developer" {class: icon-client; icon: ./icons/user.svg}
+    api: "API Service\nFastAPI :8000" {class: icon-client; icon: ./icons/fastapi.svg}
+    postgres: "PostgreSQL\n:5432" {class: icon-database; icon: ./icons/postgresql.svg}
+    qdrant: "Qdrant\n:6333" {class: icon-database; icon: ./icons/qdrant.svg}
+    openai: "OpenAI API" {class: icon-external; icon: ./icons/openai.svg}
+  }
+
+  obs_lbl: "Observability" {class: tier-label}
+  obs: {
+    direction: right
+    otel: "OTel Collector\n:4317" {class: icon-observability; icon: ./icons/opentelemetry.svg}
+    prometheus: "Prometheus\n:9090" {class: icon-observability; icon: ./icons/prometheus.svg}
+    grafana: "Grafana\n:3000" {class: icon-observability; icon: ./icons/grafana.svg}
+  }
+
+  runtime_lbl: "Runtime" {class: tier-label}
+  runtime: "Docker Runtime" {class: icon-platform; icon: ./icons/docker.svg}
+}
+
+main.app_lbl -> main.app.developer: {class: edge-invisible}
+main.obs_lbl -> main.obs.otel: {class: edge-invisible}
+main.runtime_lbl -> main.runtime: {class: edge-invisible}
+
+main.app.developer -> main.app.api: "HTTP :8000" {class: edge-data}
+main.app.api -> main.app.postgres: "Metadata" {class: edge-data}
+main.app.api -> main.app.qdrant: "Vector Search" {class: edge-data}
+main.app.api -> main.app.openai: "LLM API" {class: edge-data}
+main.app.api -> main.obs.otel: "Traces" {class: edge-metrics}
+main.obs.otel -> main.obs.prometheus: "Metrics" {class: edge-metrics}
+main.obs.prometheus -> main.obs.grafana: "Dashboards" {class: edge-data}
+main.runtime -> main.app.api: "Orchestrates" {class: edge-metrics}

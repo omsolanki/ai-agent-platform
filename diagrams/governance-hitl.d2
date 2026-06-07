@@ -1,0 +1,18 @@
+# Security governance — human-in-the-loop
+
+direction: down
+
+title: "Human-in-the-Loop Workflow" {class: title}
+
+main: {
+  direction: right
+
+  output: "Agent Output" {class: icon-agent; icon: ./icons/robot.svg}
+  check: "Confidence\nCheck" {class: icon-governance; icon: ./icons/shield.svg}
+  queue: "Human Review\nQueue" {class: icon-client; icon: ./icons/user.svg}
+  deliver: "Auto-deliver" {class: icon-client; icon: ./icons/checklist.svg}
+}
+
+main.output -> main.check: {class: edge-data}
+main.check -> main.queue: "Low confidence" {class: edge-metrics}
+main.check -> main.deliver: "High confidence" {class: edge-data}

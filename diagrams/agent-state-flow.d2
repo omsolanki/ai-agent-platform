@@ -1,0 +1,22 @@
+# Agent communication via workflow state
+
+direction: down
+
+title: "Agent State Communication" {class: title}
+
+main: {
+  direction: down
+
+  research: "Research Agent" {class: icon-agent; icon: ./icons/search.svg}
+  merge1: "LangGraph\nState Merge" {class: icon-memory; icon: ./icons/workflow.svg}
+  knowledge: "Knowledge Agent" {class: icon-agent; icon: ./icons/brain.svg}
+  merge2: "LangGraph\nState Merge" {class: icon-memory; icon: ./icons/workflow.svg}
+  summary: "Summarization Agent" {class: icon-agent; icon: ./icons/document.svg}
+  response: "Final Response\nAssembly" {class: icon-client; icon: ./icons/checklist.svg}
+}
+
+main.research -> main.merge1: "writes:\nresearch_findings" {class: edge-data}
+main.merge1 -> main.knowledge: "reads:\nresearch_findings" {class: edge-data}
+main.knowledge -> main.merge2: "writes:\ngrounded_response" {class: edge-data}
+main.merge2 -> main.summary: "reads:\nfindings + response" {class: edge-data}
+main.summary -> main.response: "writes:\nexecutive_summary" {class: edge-data}

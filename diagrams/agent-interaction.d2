@@ -1,0 +1,46 @@
+# Agent Interaction — Multi-Agent Collaboration
+
+direction: down
+
+title: "Agent Interaction Flow" {class: title}
+
+main: {
+  direction: down
+
+  pipeline_lbl: "Agent Pipeline" {class: tier-label}
+  pipeline: {
+    direction: right
+    user: "User Request" {class: icon-client; icon: ./icons/user.svg}
+    router: "Agent Router" {class: icon-platform; icon: ./icons/route.svg}
+    research: "Research Agent" {class: icon-agent; icon: ./icons/search.svg}
+    knowledge: "Knowledge Agent" {class: icon-agent; icon: ./icons/brain.svg}
+    summarization: "Summarization Agent" {class: icon-agent; icon: ./icons/document.svg}
+    output: "Final Response" {class: icon-client; icon: ./icons/checklist.svg}
+  }
+
+  memory_lbl: "Shared Memory" {class: tier-label}
+  memory: {
+    direction: right
+    state: "Workflow State\nLangGraph" {class: icon-memory; icon: ./icons/workflow.svg}
+    vector: "Vector Store\nQdrant" {class: icon-database; icon: ./icons/qdrant.svg}
+    metadata: "Metadata Store\nPostgreSQL" {class: icon-database; icon: ./icons/postgresql.svg}
+  }
+}
+
+main.pipeline_lbl -> main.pipeline.user: {class: edge-invisible}
+main.memory_lbl -> main.memory.state: {class: edge-invisible}
+
+main.pipeline.user -> main.pipeline.router: "1. Query" {class: edge-data}
+main.pipeline.router -> main.pipeline.research: "2. Route" {class: edge-data}
+main.pipeline.research -> main.memory.state: "3. Write findings" {class: edge-data}
+main.memory.state -> main.pipeline.knowledge: "4. Read findings" {class: edge-data}
+main.pipeline.knowledge -> main.memory.vector: "5. Retrieve" {class: edge-data}
+main.memory.vector -> main.pipeline.knowledge: "6. Chunks" {class: edge-data}
+main.pipeline.knowledge -> main.memory.state: "7. Write response" {class: edge-data}
+main.memory.state -> main.pipeline.summarization: "8. Read outputs" {class: edge-data}
+main.pipeline.summarization -> main.memory.state: "9. Write summary" {class: edge-data}
+main.memory.state -> main.pipeline.output: "10. Assemble" {class: edge-data}
+
+main.pipeline.research -> main.memory.metadata: "Audit" {class: edge-metrics}
+main.pipeline.knowledge -> main.memory.metadata: "Audit" {class: edge-metrics}
+main.pipeline.summarization -> main.memory.metadata: "Audit" {class: edge-metrics}

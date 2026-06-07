@@ -1,0 +1,18 @@
+# Cost governance — query caching
+
+direction: down
+
+title: "Query Caching Strategy" {class: title}
+
+main: {
+  direction: down
+
+  query: "User Query" {class: icon-client; icon: ./icons/user.svg}
+  hit: "Cached Result" {class: icon-memory; icon: ./icons/redis.svg}
+  pipeline: "Full Pipeline" {class: icon-platform; icon: ./icons/workflow.svg}
+  cache: "Redis Cache\nTTL 1hr · SHA256(query+ctx)" {class: icon-database; icon: ./icons/redis.svg}
+}
+
+main.query -> main.hit: "Cache hit" {class: edge-data}
+main.query -> main.pipeline: "Cache miss" {class: edge-data}
+main.pipeline -> main.cache: "Store result" {class: edge-data}
