@@ -13,6 +13,7 @@ fi
 D2_FLAGS=(--scale 1 --pad 60 --center)
 
 DIAGRAMS=(
+  intelligence-workbench
   system-context
   agent-interaction
   agent-state-flow

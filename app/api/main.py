@@ -1,8 +1,11 @@
 """FastAPI application entry point."""
 
+from pathlib import Path
+
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app import __version__
 from app.api.routes import router
@@ -45,11 +48,18 @@ async def startup():
     setup_metrics(__version__)
 
 
-@app.get("/")
-async def root():
-    return {
-        "name": "AI Agent Platform",
-        "version": __version__,
-        "docs": "/docs",
-        "health": "/api/v1/health",
-    }
+WORKBENCH_DIST = Path(__file__).resolve().parents[2] / "workbench" / "dist"
+
+if WORKBENCH_DIST.is_dir():
+    app.mount("/", StaticFiles(directory=WORKBENCH_DIST, html=True), name="workbench")
+else:
+
+    @app.get("/")
+    async def root():
+        return {
+            "name": "AI Agent Platform",
+            "version": __version__,
+            "docs": "/docs",
+            "health": "/api/v1/health",
+            "workbench": "Run `make workbench-build` then restart API to serve the UI at /",
+        }

@@ -67,6 +67,7 @@ class AgentOutput(BaseModel):
 
 class FinalResponse(BaseModel):
     request_id: str
+    trace_id: str | None = None
     executive_summary: ExecutiveSummary
     grounded_response: GroundedResponse | None = None
     research_findings: ResearchFinding | None = None
@@ -86,12 +87,48 @@ class WorkflowRequest(BaseModel):
     enable_summarization: bool = True
 
 
+class GovernanceCheck(BaseModel):
+    name: str
+    passed: bool
+    reason: str = ""
+
+
+class GovernanceResult(BaseModel):
+    passed: bool
+    checks: list[GovernanceCheck] = Field(default_factory=list)
+
+
 class WorkflowResponse(BaseModel):
     request_id: str
+    trace_id: str | None = None
     status: WorkflowStatus
     result: FinalResponse | None = None
     error: str | None = None
+    governance: GovernanceResult | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+class ScorecardSummary(BaseModel):
+    task_completion: float = Field(ge=0.0, le=1.0)
+    groundedness: float = Field(ge=0.0, le=1.0)
+    hallucination_rate: float = Field(ge=0.0, le=1.0)
+    workflow_success: bool = True
+
+
+class WorkflowHistoryEntry(BaseModel):
+    request_id: str
+    trace_id: str | None = None
+    query: str
+    status: WorkflowStatus
+    cost_usd: float = 0.0
+    latency_ms: float = 0.0
+    timestamp: datetime
+    scorecard_summary: ScorecardSummary | None = None
+
+
+class WorkflowProgressEvent(BaseModel):
+    event: str
+    data: dict[str, Any] = Field(default_factory=dict)
 
 
 class EvaluationScorecard(BaseModel):
@@ -106,3 +143,16 @@ class EvaluationScorecard(BaseModel):
     cost_usd: float = 0.0
     cost_efficiency: float = Field(ge=0.0, le=1.0)
     notes: str = ""
+
+
+class WorkflowRunResponse(BaseModel):
+    result: FinalResponse
+    scorecard: EvaluationScorecard
+    governance: GovernanceResult
+    routing: dict[str, Any]
+
+
+class WorkflowHistoryDetail(WorkflowHistoryEntry):
+    result: FinalResponse
+    scorecard: EvaluationScorecard | None = None
+    governance: GovernanceResult | None = None

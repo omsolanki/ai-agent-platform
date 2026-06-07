@@ -23,6 +23,8 @@ class MetadataStore:
         self._sessions: dict[str, dict[str, Any]] = {}
         self._workflows: dict[str, dict[str, Any]] = {}
         self._audit_log: list[dict[str, Any]] = []
+        self._run_history: list[dict[str, Any]] = []
+        self._max_history = 100
 
     async def connect(self) -> None:
         """Attempt PostgreSQL connection; use in-memory fallback on failure."""
@@ -76,3 +78,19 @@ class MetadataStore:
         }
         self._audit_log.append(entry)
         logger.info("audit_event", **{k: v for k, v in entry.items() if k != "details"})
+
+    async def save_run_snapshot(self, snapshot: dict[str, Any]) -> None:
+        self._run_history = [
+            entry for entry in self._run_history if entry.get("request_id") != snapshot.get("request_id")
+        ]
+        self._run_history.insert(0, snapshot)
+        self._run_history = self._run_history[: self._max_history]
+
+    async def list_run_history(self, limit: int = 10) -> list[dict[str, Any]]:
+        return self._run_history[:limit]
+
+    async def get_run_snapshot(self, request_id: str) -> dict[str, Any] | None:
+        for entry in self._run_history:
+            if entry.get("request_id") == request_id:
+                return entry
+        return None

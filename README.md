@@ -1,115 +1,161 @@
 # AI Agent Platform
 
-> Enterprise-grade Agentic AI reference implementation — demonstrating how multi-agent systems are designed, orchestrated, monitored, governed, and deployed.
+> Enterprise-grade agentic AI reference implementation — with a live **Intelligence Workbench** that shows how multi-agent systems are governed, observed, cost-controlled, and delivered to business users.
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)](https://fastapi.tiangolo.com/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-0.2+-purple.svg)](https://langchain-ai.github.io/langgraph/)
+[![React](https://img.shields.io/badge/Workbench-React-61DAFB.svg)](workbench/)
 
-**This is not a chatbot.** This is an architecture showcase for Principal Engineers, AI Platform Architects, and Heads of Engineering building production agentic AI systems.
+**This is not a chatbot.** It is a reference platform and demo workbench for Principal Engineers, AI Platform Architects, and engineering leaders who need to show *why* governed multi-agent orchestration beats a single LLM call.
+
+---
+
+## What You Get
+
+| Layer | What it demonstrates |
+|-------|----------------------|
+| **Intelligence Workbench** | Business-facing UI — query, live agent pipeline, executive output, cost, quality scorecard |
+| **Agent platform** | Research → Knowledge → Summarization pipeline via LangGraph |
+| **Governance** | Prompt injection, PII, blocked topics — visible before agents run |
+| **Observability** | OpenTelemetry traces, Prometheus metrics, Grafana dashboards, Jaeger deep links |
+| **Cost control** | Pre-run estimate vs actual cost per workflow |
+| **Quality** | Automated evaluation scorecard (groundedness, hallucination, completion) |
+
+---
+
+## Intelligence Workbench
+
+The workbench is the fastest way to understand what this platform delivers. It is an **operations console**, not a generic chat UI — every run surfaces governance, orchestration, cost, and quality alongside the business outcome.
+
+![Intelligence Workbench — governance gate, agent pipeline, executive results, cost and quality scorecard](workbench.png)
+
+A typical session shows:
+
+1. **Governance gate** — query length, injection, PII, and blocked-topic checks before execution
+2. **Live agent pipeline** — Research → Knowledge → Summarization with per-agent latency and tokens
+3. **Executive deliverable** — headline, insights, and action items (not just a chat reply)
+4. **Cost panel** — pre-run estimate vs actual spend (~$0.0002 for a full pipeline on gpt-4o-mini)
+5. **Quality passport** — groundedness, hallucination rate, task completion, cost efficiency
+6. **Run context** — copyable `request_id` and `trace_id` with links to Jaeger, Grafana, and metrics
+
+```bash
+# Terminal 1 — API
+make dev
+
+# Terminal 2 — Workbench
+make workbench-install   # first time only
+make workbench-dev
+
+open http://localhost:5173
+```
+
+Or serve the built UI from the API:
+
+```bash
+make workbench-build
+make dev
+open http://localhost:8000
+```
 
 ---
 
 ## Executive Summary
 
-Organizations adopting agentic AI face a common challenge: how to move from prototype chatbots to governed, observable, cost-controlled multi-agent platforms. This repository provides a **reference implementation** that demonstrates the architectural patterns, design decisions, and operational practices required for enterprise deployment.
+Organizations moving from prototype chatbots to production agentic AI need more than an LLM wrapper. They need **governed orchestration**, **observable execution**, **predictable cost**, and **measurable quality**.
 
-The platform orchestrates three specialized agents — Research, Knowledge, and Summarization — through a LangGraph workflow engine with shared memory, governance guards, observability instrumentation, and automated evaluation.
+This repository provides a working reference: three specialized agents coordinated by LangGraph, exposed through FastAPI, and demonstrated through the Intelligence Workbench. Mock mode runs without OpenAI; the full stack adds Qdrant, PostgreSQL, Prometheus, and Grafana.
+
+---
 
 ## Business Problem
 
-| Challenge | How This Platform Addresses It |
-|-----------|-------------------------------|
-| Unpredictable AI costs | Token budgeting, model tiering, cost estimation per request |
-| No visibility into agent behavior | OpenTelemetry traces, Prometheus metrics, structured audit logs |
-| Quality inconsistency | Automated evaluation scorecards with groundedness and hallucination metrics |
-| Security and compliance gaps | Prompt injection detection, PII filtering, audit logging, governance guards |
-| Architecture uncertainty | Documented ADRs, tradeoff analysis, 4-stage scalability evolution |
-| Vendor lock-in risk | Vendor-neutral observability, abstraction layers, self-hosted options |
+| Challenge | How this platform addresses it |
+|-----------|----------------------------------|
+| Unpredictable AI costs | Token budgets, model tiering, pre-run cost estimate, per-request actuals in the UI |
+| No visibility into agent behavior | Live pipeline in the workbench; OTel traces; Prometheus + Grafana |
+| Inconsistent output quality | Automated scorecard with groundedness and hallucination metrics |
+| Security and compliance gaps | Governance gate on every request; audit logging; PII and injection checks |
+| Architecture uncertainty | ADRs, tradeoff analysis, D2 diagrams, four-stage scalability model |
+| Stakeholder communication | Workbench demo script — show cost, governance, and quality in one screen |
 
-## Why Agentic AI
+---
 
-Traditional LLM applications follow a single-prompt pattern: input → LLM → output. Agentic AI decomposes complex tasks into specialized agents that collaborate through orchestrated workflows:
+## Why Agentic AI (Not a Single LLM)
 
 ```
-Single LLM:     User → [One Model] → Response (limited, expensive, ungoverned)
+Single LLM:     User → [One Model] → Response
+                (opaque, expensive, hard to govern)
 
-Agentic AI:     User → [Router] → [Research] → [Knowledge] → [Summarization] → Response
-                                   ↑ governed, observable, cost-controlled ↑
+Agentic AI:     User → [Governance] → [Router] → [Research] → [Knowledge] → [Summarization] → [Evaluation]
+                (specialized agents, observable steps, cost-aware, quality-scored)
 ```
 
-**Benefits**: Specialized quality per task, cost optimization via routing, governance at every step, observable and debuggable execution, independently scalable agents.
+Specialized agents improve quality per task. Orchestration enables routing and retries. Governance and observability apply at every step — not after the fact.
+
+---
 
 ## Architecture Overview
 
-```
-┌─────────────┐     ┌──────────────────────────────────────────────────┐
-│   Client    │────▶│              AI Agent Platform                  │
-│  (API/UI)   │     │                                                  │
-└─────────────┘     │  ┌─────────┐  ┌──────────┐  ┌──────────────┐  │
-                    │  │ FastAPI │─▶│ LangGraph │─▶│  Agent Pool  │  │
-                    │  │   API   │  │ Workflow  │  │  (3 agents)  │  │
-                    │  └─────────┘  └──────────┘  └──────────────┘  │
-                    │       │              │              │          │
-                    │  ┌─────────┐  ┌──────────┐  ┌──────────────┐  │
-                    │  │Governance│  │  Memory  │  │Observability │  │
-                    │  └─────────┘  └──────────┘  └──────────────┘  │
-                    └──────────────────────────────────────────────────┘
-                              │                    │
-                    ┌─────────┴──────┐    ┌───────┴────────┐
-                    │  Qdrant + PG   │    │   OpenAI API   │
-                    └────────────────┘    └────────────────┘
-```
+![Architecture Overview](diagrams/intelligence-workbench.svg)
 
-See [docs/architecture.md](docs/architecture.md) for the complete system architecture.
+
+See also [system context](diagrams/system-context.svg) and [docs/architecture.md](docs/architecture.md) for deeper layer detail.
+
+| Tier | Components |
+|------|------------|
+| Client | Intelligence Workbench (React + Vite) |
+| API | FastAPI — REST, SSE streaming, run history, cost estimate |
+| Governance | Injection / PII / topic guards on every request |
+| Orchestration | LangGraph workflow, agent router, retry policy |
+| Agents | Research, Knowledge, Summarization (gpt-4o-mini) |
+| Memory | Qdrant (vectors) + PostgreSQL (metadata, audit) |
+| Observability | OpenTelemetry → Jaeger / Prometheus → Grafana |
+
+---
 
 ## Agent Design
 
-Three collaborating agents, each with a single responsibility:
+Three agents, each with a single responsibility:
 
-### Research Agent
-Gathers and structures information from available sources.
-- **Outputs**: Structured findings, references, confidence indicators
-- **Model**: gpt-4o-mini
+| Agent | Role | Output |
+|-------|------|--------|
+| **Research** | Gather and structure information | Findings, references, confidence |
+| **Knowledge** | Retrieve and ground answers | Citations, retrieved chunks, confidence |
+| **Summarization** | Synthesize for decision-makers | Executive summary, insights, action items |
 
-### Knowledge Agent
-Retrieves relevant knowledge via vector search and generates grounded, cited responses.
-- **Outputs**: Grounded answers, citations, confidence scores
-- **Model**: gpt-4o-mini + Qdrant retrieval
+See [docs/agent-design.md](docs/agent-design.md).
 
-### Summarization Agent
-Synthesizes multi-agent outputs into executive-ready deliverables.
-- **Outputs**: Executive summary, key insights, action items
-- **Model**: gpt-4o-mini
+---
 
-See [docs/agent-design.md](docs/agent-design.md) for detailed agent specifications.
-
-## Workflow Orchestration
+## Workflow
 
 ```
-User Request → Governance Guard → Agent Router → Research → Knowledge → Summarization → Evaluation → Response
+Query → Governance Gate → Agent Router → Research → Knowledge → Summarization → Evaluation → Response
 ```
 
 | Capability | Implementation |
-|-----------|---------------|
-| Agent communication | Shared LangGraph workflow state |
-| Context passing | Structured context dict per agent |
-| State management | Immutable state updates per node |
+|------------|----------------|
+| Live progress | SSE stream (`/workflow/execute/stream`) |
+| Combined run | Single call with result + scorecard (`/workflow/run`) |
+| Cost estimate | Pre-execution projection (`/workflow/estimate-cost`) |
+| Run history | Last N completed runs (`/workflow/history`) |
 | Retry handling | Exponential backoff, max 3 retries |
-| Failure recovery | Graceful degradation, partial results |
-| Cost estimation | Pre-execution cost projection |
 
-See [docs/workflow-orchestration.md](docs/workflow-orchestration.md) for the complete orchestration design.
+See [docs/workflow-orchestration.md](docs/workflow-orchestration.md).
+
+---
 
 ## Quick Start
 
 ### Prerequisites
 
 - Python 3.11+
-- Docker & Docker Compose (for full stack)
-- Optional: OpenAI API key
+- Node.js 18+ (for the workbench)
+- Docker & Docker Compose (optional — full observability stack)
+- OpenAI API key (optional — mock mode works without it)
 
-### Local Development (No Docker)
+### API only (mock mode)
 
 ```bash
 git clone https://github.com/your-org/ai-agent-platform.git
@@ -117,215 +163,233 @@ cd ai-agent-platform
 
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-
-# Works without API key (mock mode)
-uvicorn app.api.main:app --reload --port 8000
+make dev
 ```
 
-### Full Stack (Docker)
+### Workbench + API (recommended demo)
+
+```bash
+make dev              # API on :8000
+make workbench-dev    # UI on :5173
+```
+
+### Full stack (Docker)
 
 ```bash
 cp .env.example .env
-cd docker && docker-compose up -d
-
-# Verify
+make docker-up
 curl http://localhost:8000/api/v1/health
-
-# Run example workflow
-python ../examples/run_workflow.py
 ```
 
-### API Usage
+### API examples
 
 ```bash
-# Execute workflow
-curl -X POST http://localhost:8000/api/v1/workflow/execute \
+# Run workflow + scorecard in one call
+curl -X POST http://localhost:8000/api/v1/workflow/run \
   -H "Content-Type: application/json" \
-  -d '{"query": "How should we design an enterprise multi-agent AI platform?"}'
+  -d '{"query": "What governance controls should an enterprise agentic AI platform enforce?"}'
 
-# Estimate cost before execution
+# Pre-run cost estimate
 curl -X POST http://localhost:8000/api/v1/workflow/estimate-cost \
   -H "Content-Type: application/json" \
   -d '{"query": "Enterprise AI governance best practices"}'
 
-# Get evaluation scorecard
-curl -X POST http://localhost:8000/api/v1/workflow/evaluate \
-  -H "Content-Type: application/json" \
-  -d '{"query": "What are the key components of agentic AI observability?"}'
+# Recent runs
+curl http://localhost:8000/api/v1/workflow/history?limit=10
 ```
 
-API documentation available at `http://localhost:8000/docs`.
+OpenAPI docs: `http://localhost:8000/docs`
 
-## Memory Design
+---
 
-| Tier | Store | Retention | Purpose |
-|------|-------|-----------|---------|
-| Short-term | LangGraph state | Request lifetime | Conversation context, agent outputs |
-| Vector | Qdrant | Permanent | Semantic knowledge retrieval |
-| Metadata | PostgreSQL | 90 days | Sessions, workflows, audit logs |
-| Cache | Redis (Stage 2+) | 1 hour | Frequent query caching |
+## Memory
 
-See [docs/architecture.md](docs/architecture.md) and [diagrams/memory-architecture.d2](diagrams/memory-architecture.d2).
+| Tier | Store | Purpose |
+|------|-------|---------|
+| Short-term | LangGraph state | Conversation context, agent outputs per request |
+| Vector | Qdrant | Semantic knowledge retrieval |
+| Metadata | PostgreSQL | Sessions, workflows, audit logs, run history |
+| Cache | Redis (Stage 2+) | Frequent query caching |
+
+See [diagrams/memory-architecture.d2](diagrams/memory-architecture.d2).
+
+---
 
 ## Observability
 
-| Pillar | Technology | What's Tracked |
-|--------|-----------|----------------|
-| Traces | OpenTelemetry | Per-agent spans, LLM calls, retrieval |
-| Metrics | Prometheus | Latency, tokens, cost, failure rates |
-| Logs | structlog (JSON) | Workflow events, governance blocks |
-| Dashboards | Grafana | Platform overview, agent performance, cost |
+| Pillar | Technology | Tracked in workbench |
+|--------|------------|----------------------|
+| Traces | OpenTelemetry | `trace_id` + Jaeger link |
+| Metrics | Prometheus | Footer link to `/api/v1/metrics` |
+| Logs | structlog (JSON) | Governance and workflow events |
+| Dashboards | Grafana | Footer link (local stack) |
 
 ```bash
-# Prometheus metrics
 curl http://localhost:8000/api/v1/metrics
-
-# Grafana dashboards
-open http://localhost:3000  # admin/admin
+open http://localhost:3000   # Grafana (Docker stack)
 ```
 
 See [docs/monitoring-observability.md](docs/monitoring-observability.md).
+
+---
 
 ## Cost Governance
 
 | Strategy | Impact |
 |----------|--------|
-| Model tiering (gpt-4o-mini default) | 90% cost reduction vs gpt-4o |
-| Agent routing (skip unnecessary agents) | 30-60% savings on simple queries |
-| Token budgeting (8K per request) | Prevents runaway costs |
-| Response caching (40% hit rate) | 40% reduction at scale |
-| Pre-execution cost estimation | Transparent cost before execution |
+| Model tiering (gpt-4o-mini default) | ~90% cost reduction vs gpt-4o |
+| Agent routing | Skip agents when not needed |
+| Token budgeting | 8K per request (configurable) |
+| Pre-run estimate | Shown in workbench before execution |
 
-**Estimated cost per workflow**: ~$0.001 (full pipeline, gpt-4o-mini)
+**Typical full pipeline cost:** ~$0.0002 (gpt-4o-mini, mock or live)
 
-See [docs/cost-governance.md](docs/cost-governance.md) for detailed calculations.
+See [docs/cost-governance.md](docs/cost-governance.md).
 
-## Evaluation Framework
+---
 
-Every workflow execution produces an automated quality scorecard:
+## Evaluation
 
-| Dimension | Target | Measurement |
-|-----------|--------|-------------|
-| Task Completion | > 0.90 | Output completeness |
-| Groundedness | > 0.80 | Citation + retrieval quality |
-| Hallucination Rate | < 0.15 | Inverse confidence |
-| Agent Accuracy | > 0.95 | Per-agent success rate |
-| Cost Efficiency | > 0.70 | Quality per dollar |
+Every completed workflow produces a quality scorecard:
+
+| Dimension | What it measures |
+|-----------|------------------|
+| Task completion | Output completeness |
+| Groundedness | Citation and retrieval quality |
+| Hallucination rate | Inverse confidence signal |
+| Agent accuracy | Per-agent success rate |
+| Cost efficiency | Quality per dollar |
 
 See [docs/evaluation-framework.md](docs/evaluation-framework.md).
 
+---
+
 ## AI Governance
 
-- **Prompt injection protection** — Pattern-based input scanning
-- **PII detection** — SSN, credit card, email filtering
-- **Tool access controls** — Per-agent permission model
-- **Token budget enforcement** — Configurable per-request limits
-- **Audit logging** — Every governance event persisted
-- **Hallucination mitigation** — Grounding requirements, confidence thresholds
+- Prompt injection detection
+- PII filtering (SSN, credit card)
+- Blocked topic policies
+- Token budget enforcement
+- Audit logging on workflow events
+
+Governance results are returned in the API and displayed in the workbench governance gate.
 
 See [docs/security-governance.md](docs/security-governance.md).
 
-## Deployment Options
+---
 
-| Model | Use Case | Guide |
-|-------|----------|-------|
+## Deployment
+
+| Model | Use case | Diagram |
+|-------|----------|---------|
 | Local Docker | Development, demos | [deployment-local.d2](diagrams/deployment-local.d2) |
 | AWS ECS/Fargate | Production SaaS | [deployment-aws.d2](diagrams/deployment-aws.d2) |
 | Kubernetes/EKS | Enterprise multi-tenant | [deployment-k8s.d2](diagrams/deployment-k8s.d2) |
 
 See [docs/deployment-guide.md](docs/deployment-guide.md).
 
+---
+
 ## Scalability Evolution
 
 ```
-Stage 1: Single Agent Runtime     ← You are here
-Stage 2: Distributed Agent Services
-Stage 3: Dedicated Memory Layer
-Stage 4: Enterprise Multi-Agent Platform
+Stage 1: Single-process runtime + Workbench     ← current
+Stage 2: Distributed agent services
+Stage 3: Dedicated memory layer with replicas
+Stage 4: Enterprise multi-tenant platform
 ```
 
-See [docs/tradeoffs.md](docs/tradeoffs.md) for the complete evolution model.
+See [docs/tradeoffs.md](docs/tradeoffs.md).
 
-## Design Decisions
+---
 
-| ADR | Decision | Rationale |
-|-----|----------|-----------|
-| [ADR-001](adr/adr-001-agent-framework.md) | LangGraph for orchestration | AI-native state management, graph workflows |
-| [ADR-002](adr/adr-002-memory-strategy.md) | Qdrant + PostgreSQL dual store | Optimal per access pattern |
-| [ADR-003](adr/adr-003-routing-strategy.md) | Rule-based agent router | Zero-cost, deterministic routing |
-| [ADR-004](adr/adr-004-model-selection.md) | Tiered model selection | 90% cost reduction |
-| [ADR-005](adr/adr-005-observability.md) | OTel + Prometheus + Grafana | Vendor-neutral observability |
+## Design Decisions (ADRs)
+
+| ADR | Decision |
+|-----|----------|
+| [ADR-001](adr/adr-001-agent-framework.md) | LangGraph for orchestration |
+| [ADR-002](adr/adr-002-memory-strategy.md) | Qdrant + PostgreSQL dual store |
+| [ADR-003](adr/adr-003-routing-strategy.md) | Rule-based agent router |
+| [ADR-004](adr/adr-004-model-selection.md) | Tiered model selection |
+| [ADR-005](adr/adr-005-observability.md) | OTel + Prometheus + Grafana |
+
+---
 
 ## Repository Structure
 
 ```
 ai-agent-platform/
-├── README.md                          # This file
-├── docs/                              # Architecture documentation
-│   ├── architecture.md                # System architecture
-│   ├── agent-design.md                # Agent specifications
-│   ├── workflow-orchestration.md      # Orchestration design
-│   ├── monitoring-observability.md    # Observability framework
-│   ├── cost-governance.md             # Cost control strategy
-│   ├── evaluation-framework.md        # Quality evaluation
-│   ├── security-governance.md         # AI governance
-│   ├── deployment-guide.md            # Deployment models
-│   └── tradeoffs.md                   # Tradeoffs & evolution
-├── diagrams/                          # D2 architecture diagrams (SVG + local icons)
-├── adr/                               # Architecture Decision Records
-├── app/                               # Python implementation
-│   ├── agents/                        # Research, Knowledge, Summarization
-│   ├── orchestration/                 # Router, workflow engine, retry
-│   ├── memory/                        # Vector + metadata stores
-│   ├── evaluation/                    # Quality scorecards
-│   ├── monitoring/                    # OTel + Prometheus
-│   ├── governance/                    # Security guards
-│   └── api/                           # FastAPI endpoints
-├── docker/                            # Docker Compose + configs
-├── examples/                          # Usage examples
-└── tests/                             # Integration tests
+├── README.md
+├── workbench.png              # Workbench screenshot (README)
+├── workbench/                 # Intelligence Workbench (React + Vite)
+├── docs/                      # Architecture documentation
+├── diagrams/                  # D2 diagrams (SVG + PDF)
+├── adr/                       # Architecture Decision Records
+├── app/
+│   ├── agents/                # Research, Knowledge, Summarization
+│   ├── orchestration/         # Router, workflow engine, retry
+│   ├── memory/                # Vector + metadata stores
+│   ├── evaluation/            # Quality scorecards
+│   ├── monitoring/            # OTel + Prometheus
+│   ├── governance/            # Security guards
+│   └── api/                   # FastAPI endpoints
+├── docker/                    # Docker Compose stack
+├── examples/
+└── tests/
 ```
+
+---
 
 ## Technology Stack
 
 | Layer | Technology |
-|-------|-----------|
+|-------|------------|
+| Workbench | React, Vite, TypeScript, Tailwind |
 | API | FastAPI |
 | Orchestration | LangGraph |
 | LLM | OpenAI (gpt-4o-mini) |
-| Vector Store | Qdrant |
-| Metadata Store | PostgreSQL |
-| Observability | OpenTelemetry, Prometheus, Grafana |
-| Containerization | Docker |
+| Vector store | Qdrant |
+| Metadata | PostgreSQL |
+| Observability | OpenTelemetry, Prometheus, Grafana, Jaeger |
+| Containers | Docker |
+
+---
+
+## Diagrams
+
+Architecture diagrams use **local SVG icons** (no CDN), a shared D2 theme, and labeled connectors.
+
+```bash
+make diagrams   # requires D2 CLI: https://d2lang.com/
+```
+
+Key diagrams: `intelligence-workbench`, `system-context`, `agent-interaction`, `memory-architecture`, `deployment-*`.
+
+---
+
+## Tests
+
+```bash
+pip install -r requirements.txt
+pytest tests/ -v
+
+# Skip slow workflow integration tests
+pytest tests/ -v -m "not slow"
+```
+
+---
 
 ## Future Enhancements
 
 - [ ] LangGraph checkpointing for human-in-the-loop workflows
 - [ ] Redis caching layer (Stage 2)
-- [ ] LLM-as-judge evaluation (sampled quality assessment)
+- [ ] LLM-as-judge evaluation (sampled)
 - [ ] Multi-provider LLM support (Anthropic, Google)
-- [ ] Agent marketplace for custom agent registration (Stage 4)
+- [ ] Agent marketplace (Stage 4)
 - [ ] Per-tenant governance policies and cost budgets
-- [ ] Web search integration for Research Agent
-- [ ] Hybrid search (vector + BM25) for Knowledge Agent
+- [ ] Knowledge-base upload UI in the workbench
 
-## Architecture Diagrams
-
-Diagrams use **local SVG icons** (no CDN dependency) with a shared D2 theme, color-coded layers, and labeled connectors.
-
-```bash
-# Requires D2 CLI: https://d2lang.com/
-make diagrams
-```
-
-Rendered outputs: `diagrams/*.svg` and `diagrams/*.pdf` (19 architecture diagrams). SVGs are embedded in `docs/`.
-
-## Running Tests
-
-```bash
-pip install -r requirements.txt
-pytest tests/ -v
-```
+---
 
 ## License
 
@@ -333,4 +397,4 @@ MIT
 
 ---
 
-*Built to demonstrate enterprise agentic AI architecture — not as a product, but as a reference for engineering leaders designing the next generation of AI platforms.*
+*Built as a reference for engineering leaders designing governed, observable, cost-aware agentic AI platforms — with a workbench that makes the architecture tangible for business stakeholders.*

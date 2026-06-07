@@ -1,0 +1,76 @@
+# Intelligence Workbench — Architecture Overview
+
+direction: down
+
+title: "Architecture Overview" {class: title}
+
+main: {
+  direction: down
+
+  client_lbl: "Client Experience" {class: tier-label}
+  client: {
+    direction: right
+    users: "Business Users\n& Architects" {class: icon-client; icon: ./icons/users.svg}
+    workbench: "Intelligence\nWorkbench" {class: icon-client; icon: ./icons/eye.svg}
+  }
+
+  api_lbl: "API & Governance" {class: tier-label}
+  api: {
+    direction: right
+    fastapi: "FastAPI\nREST + SSE" {class: icon-client; icon: ./icons/fastapi.svg}
+    governance: "Governance\nGate" {class: icon-governance; icon: ./icons/shield.svg}
+    history: "Run History\n& Audit" {class: icon-memory; icon: ./icons/database.svg}
+  }
+
+  orch_lbl: "Orchestration & Agents" {class: tier-label}
+  orch: {
+    direction: right
+    router: "Agent\nRouter" {class: icon-platform; icon: ./icons/route.svg}
+    engine: "LangGraph\nWorkflow" {class: icon-platform; icon: ./icons/workflow.svg}
+    research: "Research\nAgent" {class: icon-agent; icon: ./icons/search.svg}
+    knowledge: "Knowledge\nAgent" {class: icon-agent; icon: ./icons/brain.svg}
+    summary: "Summarization\nAgent" {class: icon-agent; icon: ./icons/document.svg}
+    evaluate: "Quality\nScorecard" {class: icon-platform; icon: ./icons/evaluate.svg}
+  }
+
+  data_lbl: "Memory & LLM" {class: tier-label}
+  data: {
+    direction: right
+    vector: "Qdrant\nVector Store" {class: icon-database; icon: ./icons/qdrant.svg}
+    metadata: "PostgreSQL\nMetadata" {class: icon-database; icon: ./icons/postgresql.svg}
+    openai: "OpenAI API\nLLM Provider" {class: icon-external; icon: ./icons/openai.svg}
+  }
+
+  obs_lbl: "Observability" {class: tier-label}
+  obs: {
+    direction: right
+    otel: "OpenTelemetry\nTracing" {class: icon-observability; icon: ./icons/opentelemetry.svg}
+    jaeger: "Jaeger\nTrace UI" {class: icon-observability; icon: ./icons/jaeger.svg}
+    prometheus: "Prometheus\nMetrics" {class: icon-observability; icon: ./icons/prometheus.svg}
+    grafana: "Grafana\nDashboards" {class: icon-observability; icon: ./icons/grafana.svg}
+  }
+}
+
+main.client_lbl -> main.client.users: {class: edge-invisible}
+main.api_lbl -> main.api.fastapi: {class: edge-invisible}
+main.orch_lbl -> main.orch.router: {class: edge-invisible}
+main.data_lbl -> main.data.vector: {class: edge-invisible}
+main.obs_lbl -> main.obs.otel: {class: edge-invisible}
+
+main.client.users -> main.client.workbench: "Query & review" {class: edge-data}
+main.client.workbench -> main.api.fastapi: "REST / SSE" {class: edge-data}
+main.api.fastapi -> main.api.governance: "Validate" {class: edge-data}
+main.api.governance -> main.orch.router: "Route" {class: edge-data}
+main.orch.router -> main.orch.engine: "Pipeline" {class: edge-data}
+main.orch.engine -> main.orch.research: "Step 1" {class: edge-data}
+main.orch.research -> main.orch.knowledge: "Findings" {class: edge-data}
+main.orch.knowledge -> main.orch.summary: "Grounded" {class: edge-data}
+main.orch.summary -> main.orch.evaluate: "Score" {class: edge-data}
+main.orch.knowledge -> main.data.vector: "Retrieve" {class: edge-data}
+main.orch.engine -> main.data.metadata: "Persist" {class: edge-data}
+main.orch.research -> main.data.openai: "LLM" {class: edge-data}
+main.api.fastapi -> main.api.history: "Snapshots" {class: edge-data}
+main.api.fastapi -> main.obs.otel: "Spans" {class: edge-metrics}
+main.obs.otel -> main.obs.jaeger: "Traces" {class: edge-metrics}
+main.obs.otel -> main.obs.prometheus: "Metrics" {class: edge-metrics}
+main.obs.prometheus -> main.obs.grafana: "Dashboards" {class: edge-metrics}

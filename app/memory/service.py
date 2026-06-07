@@ -74,3 +74,15 @@ class MemoryService:
 
     async def audit(self, event_type: str, actor: str, details: dict[str, Any], request_id: str | None = None) -> None:
         await self.metadata_store.audit_log(event_type, actor, details, request_id)
+
+    async def save_run_snapshot(self, snapshot: dict[str, Any]) -> None:
+        await self.initialize()
+        await self.metadata_store.save_run_snapshot(snapshot)
+
+    async def list_run_history(self, limit: int = 10) -> list[dict[str, Any]]:
+        await self.initialize()
+        return await self.metadata_store.list_run_history(limit=limit)
+
+    async def get_run_snapshot(self, request_id: str) -> dict[str, Any] | None:
+        await self.initialize()
+        return await self.metadata_store.get_run_snapshot(request_id)

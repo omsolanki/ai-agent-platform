@@ -1,10 +1,19 @@
-.PHONY: install dev test docker-up docker-down lint example
+.PHONY: install dev test docker-up docker-down lint example workbench-install workbench-dev workbench-build
 
 install:
 	pip install -r requirements.txt
 
 dev:
 	uvicorn app.api.main:app --reload --port 8000
+
+workbench-install:
+	cd workbench && npm install
+
+workbench-dev:
+	cd workbench && npm run dev
+
+workbench-build:
+	cd workbench && npm run build
 
 test:
 	pytest tests/ -v

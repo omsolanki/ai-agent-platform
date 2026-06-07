@@ -53,3 +53,13 @@ def get_tracer():
     from opentelemetry import trace
 
     return _tracer or trace.get_tracer("ai-agent-platform")
+
+
+def get_current_trace_id() -> str | None:
+    """Return the active OpenTelemetry trace ID as a 32-char hex string."""
+    from opentelemetry import trace
+
+    ctx = trace.get_current_span().get_span_context()
+    if ctx.is_valid:
+        return format(ctx.trace_id, "032x")
+    return None

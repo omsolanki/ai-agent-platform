@@ -1,6 +1,8 @@
 """LangGraph workflow execution engine for multi-agent orchestration."""
 
+import asyncio
 import time
+from collections.abc import Awaitable, Callable
 from typing import Any
 from uuid import uuid4
 
@@ -24,10 +26,12 @@ from app.models.schemas import (
 )
 from app.models.state import WorkflowState
 from app.monitoring.metrics import record_workflow_execution
-from app.monitoring.telemetry import get_tracer
+from app.monitoring.telemetry import get_current_trace_id, get_tracer
 from app.orchestration.router import AgentRouter, RouteStrategy
 
 logger = structlog.get_logger()
+
+ProgressCallback = Callable[[str, dict[str, Any]], Awaitable[None] | None]
 
 
 class WorkflowEngine:
@@ -57,6 +61,7 @@ class WorkflowEngine:
             "knowledge_agent": self.knowledge_agent,
             "summarization_agent": self.summarization_agent,
         }
+        self._on_progress: ProgressCallback | None = None
 
     def _build_graph(self, agent_sequence: list[str]) -> StateGraph:
         """Build LangGraph workflow for the given agent sequence."""
@@ -77,6 +82,7 @@ class WorkflowEngine:
         """Create a LangGraph node function for the given agent."""
 
         async def node(state: WorkflowState) -> dict[str, Any]:
+            await self._emit_progress("agent_start", {"agent": agent_name})
             agent = self._agents[agent_name]
             context = {
                 "query": state.get("query", ""),
@@ -94,6 +100,17 @@ class WorkflowEngine:
             }
 
             output = await agent.run(context)
+            await self._emit_progress(
+                "agent_done",
+                {
+                    "agent": agent_name,
+                    "success": output.success,
+                    "tokens_used": output.tokens_used,
+                    "latency_ms": output.latency_ms,
+                    "model": output.model,
+                    "error": output.error,
+                },
+            )
             updates: dict[str, Any] = {
                 "current_agent": agent_name,
                 "agent_outputs": state.get("agent_outputs", []) + [output],
@@ -125,23 +142,43 @@ class WorkflowEngine:
 
         return node
 
-    async def execute(self, request: WorkflowRequest) -> FinalResponse:
+    async def _emit_progress(self, event: str, data: dict[str, Any]) -> None:
+        if self._on_progress is None:
+            return
+        result = self._on_progress(event, data)
+        if asyncio.iscoroutine(result):
+            await result
+
+    async def execute(
+        self,
+        request: WorkflowRequest,
+        on_progress: ProgressCallback | None = None,
+    ) -> FinalResponse:
         """Execute the full agent workflow for a user request."""
+        self._on_progress = on_progress
         request_id = str(uuid4())
         start = time.perf_counter()
 
         with self.tracer.start_as_current_span("workflow.execute") as span:
+            trace_id = get_current_trace_id()
             span.set_attribute("request.id", request_id)
             span.set_attribute("query.length", len(request.query))
+            if trace_id:
+                span.set_attribute("trace.id", trace_id)
 
-            guard_result = self.guard.validate_request(request.query)
-            if not guard_result.passed:
-                logger.warning("governance_blocked", reason=guard_result.reason)
+            governance = self.guard.audit_request(request.query)
+            await self._emit_progress("governance", governance.model_dump())
+
+            if not governance.passed:
+                failed = next(c for c in governance.checks if not c.passed)
+                logger.warning("governance_blocked", reason=failed.reason)
+                await self._emit_progress("error", {"message": failed.reason, "governance": governance.model_dump()})
                 return FinalResponse(
                     request_id=request_id,
+                    trace_id=trace_id,
                     executive_summary=ExecutiveSummary(
                         headline="Request blocked by governance policy",
-                        key_insights=[guard_result.reason],
+                        key_insights=[failed.reason],
                     ),
                     status=WorkflowStatus.FAILED,
                 )
@@ -149,6 +186,8 @@ class WorkflowEngine:
             session_id = await self.memory.get_or_create_session(request.session_id)
             strategy = self.router.route(request)
             agent_sequence = self.router.get_agent_sequence(strategy)
+            routing = self.router.estimate_cost(strategy, len(request.query))
+            await self._emit_progress("routing", routing)
 
             span.set_attribute("route.strategy", strategy.value)
             span.set_attribute("route.agents", ",".join(agent_sequence))
@@ -174,10 +213,12 @@ class WorkflowEngine:
                 final_state = await compiled.ainvoke(initial_state)
             except Exception as exc:
                 logger.error("workflow_failed", request_id=request_id, error=str(exc))
+                await self._emit_progress("error", {"message": str(exc)})
                 latency_ms = (time.perf_counter() - start) * 1000
                 record_workflow_execution(success=False, latency_ms=latency_ms, strategy=strategy.value)
                 return FinalResponse(
                     request_id=request_id,
+                    trace_id=trace_id,
                     executive_summary=ExecutiveSummary(
                         headline="Workflow execution failed",
                         key_insights=[str(exc)],
@@ -193,6 +234,7 @@ class WorkflowEngine:
 
             response = FinalResponse(
                 request_id=request_id,
+                trace_id=trace_id,
                 executive_summary=final_state.get("executive_summary")
                 or ExecutiveSummary(headline="No summary generated"),
                 grounded_response=final_state.get("grounded_response"),
@@ -219,6 +261,7 @@ class WorkflowEngine:
                 cost_usd=total_cost,
                 latency_ms=latency_ms,
             )
+            await self._emit_progress("complete", {"result": response.model_dump(mode="json")})
             return response
 
     def _estimate_total_cost(self, outputs: list[AgentOutput]) -> float:

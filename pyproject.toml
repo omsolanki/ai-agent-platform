@@ -17,3 +17,6 @@ select = ["E", "F", "I", "W"]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = [
+    "slow: integration tests that execute full workflows",
+]

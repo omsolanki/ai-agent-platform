@@ -55,3 +55,7 @@ mydocs/*.build.d2
 
 mydocs/*
 /mydocs
+
+# Workbench (Intelligence Workbench client)
+workbench/node_modules/
+workbench/dist/
